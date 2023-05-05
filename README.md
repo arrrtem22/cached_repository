@@ -1,4 +1,4 @@
-# Logger
+# Cached Repository
 
 [![pub package](https://img.shields.io/pub/v/cached_repository.svg?logo=dart&logoColor=00b9fc)](https://pub.dartlang.org/packages/cached_repository)
 [![Last Commits](https://img.shields.io/github/last-commit/arrrtem22/cached_repository?logo=git&logoColor=white)](https://github.com/arrrtem22/cached_repository/commits/master)

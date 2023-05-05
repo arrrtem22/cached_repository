@@ -1,10 +1,10 @@
 # Logger
 
-[![pub package](https://img.shields.io/pub/v/logger.svg?logo=dart&logoColor=00b9fc)](https://pub.dartlang.org/packages/cached_repository)
-[![Last Commits](https://img.shields.io/github/last-commit/Bungeefan/logger?logo=git&logoColor=white)](https://github.com/arrrtem22/cached_repository/commits/master)
-[![Pull Requests](https://img.shields.io/github/issues-pr/Bungeefan/logger?logo=github&logoColor=white)](https://github.com/arrrtem22/cached_repository/pulls)
-[![Code size](https://img.shields.io/github/languages/code-size/Bungeefan/logger?logo=github&logoColor=white)](https://github.com/arrrtem22/cached_repository)
-[![License](https://img.shields.io/github/license/Bungeefan/logger?logo=open-source-initiative&logoColor=green)](https://github.com/arrrtem22/cached_repository/blob/master/LICENSE)
+[![pub package](https://img.shields.io/pub/v/cached_repository.svg?logo=dart&logoColor=00b9fc)](https://pub.dartlang.org/packages/cached_repository)
+[![Last Commits](https://img.shields.io/github/last-commit/arrrtem22/cached_repository?logo=git&logoColor=white)](https://github.com/arrrtem22/cached_repository/commits/master)
+[![Pull Requests](https://img.shields.io/github/issues-pr/arrrtem22/cached_repository?logo=github&logoColor=white)](https://github.com/arrrtem22/cached_repository/pulls)
+[![Code size](https://img.shields.io/github/languages/code-size/arrrtem22/cached_repository?logo=github&logoColor=white)](https://github.com/arrrtem22/cached_repository)
+[![License](https://img.shields.io/github/license/arrrtem22/cached_repository?logo=open-source-initiative&logoColor=green)](https://github.com/arrrtem22/cached_repository/blob/master/LICENSE)
 
 Simple, easy to use and extensible cached repository which can store all you need.<br>
 Inspired by [NetworkBoundResource](https://github.com/topics/networkboundresource) for Android.

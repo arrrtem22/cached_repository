@@ -10,12 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  rxdart: 0.27.3
-  synchronized: 3.0.0
-  flutter_secure_storage: 5.0.2
-  worker_manager: 3.2.6
-  hive_flutter: 1.1.0
-  logger: 1.1.0
+  rxdart: ^0.27.3
+  synchronized: ^3.0.0
+  flutter_secure_storage: ^5.0.2
+  worker_manager: ^3.2.6
+  hive_flutter: ^1.1.0
+  logger: ^1.1.0
 
 dev_dependencies:
   flutter_test:

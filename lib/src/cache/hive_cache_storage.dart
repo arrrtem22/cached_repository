@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+
 import 'package:cached_repository/src/cache/cache_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:synchronized/synchronized.dart';
@@ -11,11 +11,9 @@ import 'package:worker_manager/worker_manager.dart';
 typedef EntityDecoder<V> = V Function(dynamic json);
 
 class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
-  HiveCacheStorage(
-    this._cacheName, {
-    @required EntityDecoder<V> decode,
-    Logger /*?*/ logger,
-  })  : _encode =
+  HiveCacheStorage(this._cacheName,
+      {required EntityDecoder<V> decode, Logger? logger})
+      : _encode =
             ((value) => Executor().execute(arg1: value, fun1: _jsonEncode)),
         _decode = ((data) =>
             Executor().execute(arg1: data, fun1: _jsonDecode).then(decode)),
@@ -23,9 +21,9 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
 
   static final _lock = Lock();
   static final Map<String, Box<_BoxCacheEntry>> _boxes = {};
-  static Future<void> _openDbTask;
+  static Future<void>? _openDbTask;
 
-  final Logger /*?*/ _logger;
+  final Logger? _logger;
   final String _cacheName;
   final Future<String> Function(V value) _encode;
   final Future<V> Function(String data) _decode;
@@ -42,7 +40,7 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
   static Future<void> _initHive() {
     var task = _openDbTask;
     if (task == null) {
-      Hive.registerAdapter(CacheEntryAdapter());
+      Hive.registerAdapter(_CacheEntryAdapter());
       task = _openDbTask = Hive.initFlutter();
     }
     return task;
@@ -52,7 +50,7 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
   Future<void> clear() => _ensureBox().then((box) => box.clear());
 
   @override
-  Future< /*nullable*/ CacheEntry<V>> get(K key) async {
+  Future<CacheEntry<V>?> get(K key) async {
     final boxKey = _resolveBoxKey(key);
     final cached = (await _ensureBox()).get(boxKey);
     if (cached != null) {
@@ -60,7 +58,7 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
         final value = await _decode(cached.data);
         return CacheEntry(value, storeTime: cached.storeTime);
       } catch (e, trace) {
-        _logger.e('Error on load resource from [$_cacheName] by key [$boxKey]',
+        _logger?.e('Error on load resource from [$_cacheName] by key [$boxKey]',
             e, trace);
       }
     }
@@ -68,7 +66,7 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
   }
 
   @override
-  Future<void> put(K key, V data, {/*nullable*/ int storeTime}) async {
+  Future<void> put(K key, V data, {int? storeTime}) async {
     final boxKey = _resolveBoxKey(key);
     final entry = _BoxCacheEntry(
       await _encode(data),
@@ -87,13 +85,13 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
   String _resolveBoxKey(K key) => key.toString();
 
   Future<Box<_BoxCacheEntry>> _ensureBox() => _lock.synchronized(() async {
-        Box<_BoxCacheEntry> box = _boxes[_cacheName];
+        Box<_BoxCacheEntry>? box = _boxes[_cacheName];
         if (box == null) {
           try {
             await _initHive();
             box = await Hive.openBox(_cacheName);
           } catch (e, trace) {
-            _logger.e(
+            _logger?.e(
                 'Error on open box [$_cacheName] => delete and try again!',
                 e,
                 trace);
@@ -110,13 +108,13 @@ class HiveCacheStorage<K, V> implements CacheStorage<K, V> {
 }
 
 class _BoxCacheEntry {
-  _BoxCacheEntry(this.data, {@required this.storeTime});
+  _BoxCacheEntry(this.data, {required this.storeTime});
 
   String data;
   int storeTime;
 }
 
-class CacheEntryAdapter extends TypeAdapter<_BoxCacheEntry> {
+class _CacheEntryAdapter extends TypeAdapter<_BoxCacheEntry> {
   @override
   final typeId = 0;
 

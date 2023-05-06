@@ -14,13 +14,13 @@ class NetworkBoundResource<K, V> {
     this._fetch,
     this._cacheDurationResolver,
     this._storage, {
-    Logger /*?*/ logger,
+    Logger? logger,
   }) : _logger = logger;
 
-  final Logger /*?*/ _logger;
+  final Logger? _logger;
   final _subject = BehaviorSubject<Resource<V>>();
   final K _resourceKey;
-  final FetchCallable<K, V> _fetch;
+  final FetchCallable<K, V>? _fetch;
   final CacheDurationResolver<K, V> _cacheDurationResolver;
   final CacheStorage<K, V> _storage;
 
@@ -63,7 +63,7 @@ class NetworkBoundResource<K, V> {
     return _subject;
   }
 
-  Future<void> updateValue(V Function(V value) changeValue,
+  Future<void> updateValue(V? Function(V? value) changeValue,
       {bool notifyOnNull = false}) async {
     _lock.synchronized(() async {
       final cached = await _storage.get(_resourceKey);
@@ -84,10 +84,16 @@ class NetworkBoundResource<K, V> {
     });
   }
 
-  Future<V /*?*/ > getCachedValue() => _lock.synchronized(() async {
-        final cached = await _storage.get(_resourceKey);
-        return cached?.data;
-      });
+  Future<V?> getCachedValue({bool sync = true}) {
+    return sync
+        ? _lock.synchronized(() => _getCachedValue())
+        : _getCachedValue();
+  }
+
+  Future<V?> _getCachedValue() async {
+    final cached = await _storage.get(_resourceKey);
+    return cached?.data;
+  }
 
   Future<void> _loadProcess(bool forceReload, dynamic fetchArguments) async {
     // get value from cache
@@ -121,14 +127,15 @@ class NetworkBoundResource<K, V> {
     _shouldReload = false;
 
     // fetch value from network
-    return _subject.addStream(_fetch(_resourceKey, fetchArguments)
+    return _subject.addStream(_fetch!
+        .call(_resourceKey, fetchArguments)
         .asStream()
         .asyncMap((data) async {
           await _storage.put(_resourceKey, data);
           return data;
         })
         .map((data) => Resource.success(data))
-        .doOnError((error, trace) => _logger.e(
+        .doOnError((error, trace) => _logger?.e(
             'Error loading resource by id $_resourceKey with storage $_storage',
             error,
             trace))

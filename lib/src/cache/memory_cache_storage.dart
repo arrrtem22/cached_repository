@@ -1,3 +1,4 @@
+
 import 'package:cached_repository/src/cache/cache_storage.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -15,7 +16,7 @@ class MemoryCacheStorage<K, V> implements CacheStorage<K, V> {
   static Future<void> clearAll() async => _cache.clear();
 
   Future<Map<K, CacheEntry<V>>> _ensureCache() => _lock.synchronized(() async {
-        Map cacheBox = _cache[_cacheName];
+        Map? cacheBox = _cache[_cacheName];
         if (cacheBox == null) {
           cacheBox = <K, CacheEntry<V>>{};
           _cache[_cacheName] = cacheBox;
@@ -27,12 +28,12 @@ class MemoryCacheStorage<K, V> implements CacheStorage<K, V> {
   Future<void> clear() => _ensureCache().then((box) => box.clear());
 
   @override
-  Future< /*nullable*/ CacheEntry<V>> get(K key) async {
+  Future<CacheEntry<V>?> get(K key) async {
     return (await _ensureCache())[key];
   }
 
   @override
-  Future<void> put(K key, V data, {/*nullable*/ int storeTime}) async {
+  Future<void> put(K key, V data, {int? storeTime}) async {
     final cacheBox = await _ensureCache();
     cacheBox[key] = CacheEntry(
       data,

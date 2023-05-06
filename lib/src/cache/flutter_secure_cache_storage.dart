@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cached_repository/src/cache/cache_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:worker_manager/worker_manager.dart';
@@ -12,20 +11,24 @@ typedef SecureEntityDecoder<V> = V Function(dynamic json);
 class FlutterSecureCacheStorage<K, V> implements CacheStorage<K, V> {
   FlutterSecureCacheStorage(
     this.keyPrefix, {
-    @required SecureEntityDecoder<V> decode,
-    Logger /*?*/ logger,
+    required SecureEntityDecoder<V> decode,
+    Logger? logger,
+    FlutterSecureStorage? flutterSecureStorage,
   })  : _encode =
             ((value) => Executor().execute(arg1: value, fun1: _jsonEncode)),
         _decode = ((data) => Executor()
             .execute(arg1: data, fun1: _jsonDecode)
             .then((value) => _BoxCacheEntry.fromJson(value, decode))),
-        _logger = logger;
+        _logger = logger,
+        _box = flutterSecureStorage ??
+            const FlutterSecureStorage(
+              iOptions: IOSOptions(
+                  accessibility: KeychainAccessibility.unlocked_this_device),
+              aOptions: AndroidOptions(resetOnError: true),
+            );
 
-  static const _box = FlutterSecureStorage(
-    iOptions: IOSOptions(accessibility: IOSAccessibility.unlocked_this_device),
-    aOptions: AndroidOptions(resetOnError: true),
-  );
-  final Logger /*?*/ _logger;
+  late final FlutterSecureStorage _box;
+  final Logger? _logger;
   final String keyPrefix;
   final Future<String> Function(_BoxCacheEntry<V> value) _encode;
   final Future<_BoxCacheEntry<V>> Function(String data) _decode;
@@ -33,7 +36,7 @@ class FlutterSecureCacheStorage<K, V> implements CacheStorage<K, V> {
   @override
   Future<void> ensureInitialized() => Future.value();
 
-  static Future<void> clearAllStorage() async {
+  Future<void> clearAllStorage() async {
     await _box.deleteAll();
   }
 
@@ -42,7 +45,7 @@ class FlutterSecureCacheStorage<K, V> implements CacheStorage<K, V> {
       throw UnsupportedError('Clear not supported. Use #clearAllStorage');
 
   @override
-  Future<CacheEntry<V> /*?*/ > get(K key) async {
+  Future<CacheEntry<V>?> get(K key) async {
     final boxKey = _resolveBoxKey(key);
     final cachedJson = await _box.read(key: boxKey);
     if (cachedJson != null) {
@@ -50,7 +53,7 @@ class FlutterSecureCacheStorage<K, V> implements CacheStorage<K, V> {
         final cacheEntry = await _decode(cachedJson);
         return cacheEntry;
       } catch (e, trace) {
-        _logger.e('Error on load resource from SecureStorage by key [$boxKey]',
+        _logger?.e('Error on load resource from SecureStorage by key [$boxKey]',
             e, trace);
       }
     }
@@ -58,7 +61,7 @@ class FlutterSecureCacheStorage<K, V> implements CacheStorage<K, V> {
   }
 
   @override
-  Future<void> put(K key, V data, {int /*?*/ storeTime}) async {
+  Future<void> put(K key, V data, {int? storeTime}) async {
     final boxKey = _resolveBoxKey(key);
     final entry = _BoxCacheEntry(
       data,
@@ -81,7 +84,7 @@ class FlutterSecureCacheStorage<K, V> implements CacheStorage<K, V> {
 }
 
 class _BoxCacheEntry<V> extends CacheEntry<V> {
-  _BoxCacheEntry(V data, {@required int storeTime})
+  _BoxCacheEntry(V data, {required int storeTime})
       : super(data, storeTime: storeTime);
 
   Map<String, dynamic> toJson() => {

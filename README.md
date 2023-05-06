@@ -19,55 +19,125 @@ Inspired by [NetworkBoundResource](https://github.com/topics/networkboundresourc
 
 Just create a class with `CachedRepository` field and start caching:
 ```dart
-class StringRepository {
-  StringRepository(SomeClassApi _someClassApi)
+class SomeClassRepository {
+  SomeClassRepository(SomeClassApi someClassApi)
       : _cachedRepo = CachedRepository.persistent(
     'my_objects',
-    fetch: (String key, [__]) => _someClassApi.getObjects(),
+    fetch: (String key, [__]) => someClassApi.getObjects(key),
     decode: (json) => SomeClass.listFromJson(json),
     cacheDuration: const Duration(hours: 12),
   );
 
   final CachedRepository<String, List<SomeClass>> _cachedRepo;
 
-  static const _key = '';
+  final _logger = Logger();
 
-  Stream<Resource<List<SomeClass>>> officeString({
-    bool forceReload = false,
-  }) =>
-      _cachedRepo.stream(_key, forceReload: forceReload);
+  Stream<Resource<List<SomeClass>>> getMyObjectsStream(
+      String parameter, {
+        bool forceReload = false,
+      }) {
+    _logger.d('SomeClassRepository => getMyObjectsStream');
+    return _cachedRepo.stream(parameter, forceReload: forceReload);
+  }
 
-  Future<void> invalidate() => _cachedRepo.invalidate(_key);
+  Future<Resource<List<SomeClass>>> getMyObjects(
+      String parameter, {
+        bool forceReload = false,
+      }) {
+    _logger.d('SomeClassRepository => getMyObjects');
+    return _cachedRepo.first(parameter, forceReload: forceReload);
+  }
 
-  Future<void> removeStringFromCache({
-    required String stringId,
-  }) async {
-    return _cachedRepo.updateValue(_key, (list) {
-      return list?.where((it) => it.id != stringId).toList(growable: false);
+  Future<void> invalidate(String parameter) {
+    _logger.d('SomeClassRepository => invalidate');
+    return _cachedRepo.invalidate(parameter);
+  }
+
+  Future<void> removeObjectFromCache(
+      String parameter, {
+        /*required*/ String objectId,
+      }) async {
+    _logger.d('SomeClassRepository => removeObjectFromCache');
+    return _cachedRepo.updateValue(parameter, (list) {
+      return list.where((it) => it.id != objectId).toList(growable: false);
     });
   }
 
-  Future<void> removeCompaniesFromCache({
-    required List<String> stringIds,
-  }) async {
-    return _cachedRepo.updateValue(_key, (list) {
+  Future<void> removeObjectsFromCache(
+      String parameter, {
+        /*required*/ List<String> objectIds,
+      }) async {
+    _logger.d('SomeClassRepository => removeObjectsFromCache');
+    return _cachedRepo.updateValue(parameter, (list) {
       return list
-          ?.where((it) => !stringIds.contains(it.id))
-          .toList(growable: false);
+          ?.where((it) => !objectIds.contains(it.id))
+          ?.toList(growable: false);
     });
   }
 
-  Future<void> clear() => _cachedRepo.clear();
+  Future<void> clear(String parameter) {
+    _logger.d('SomeClassRepository => clear');
+    return _cachedRepo.clear(parameter);
+  }
 }
 
-abstract class SomeClass {
-  String get id;
+class SomeClass {
+  final String id;
 
-  static List<SomeClass> listFromJson(List<dynamic> jsonList) => <SomeClass>[];
+  SomeClass(this.id);
+
+  factory SomeClass.fromJson(Map<String, dynamic> json) {
+    return SomeClass(
+      json['id'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+    };
+  }
+
+  static List<SomeClass> listFromJson(List<dynamic>/*?*/ jsonList) =>
+      (jsonList ?? [])
+          .map((json) => SomeClass.fromJson(json))
+          .toList(growable: false);
 }
 
 abstract class SomeClassApi {
-  Future<List<SomeClass>> getObjects();
+  factory SomeClassApi() => _SomeClassFakeApi();
+
+  Future<List<SomeClass>> getObjects(String parameter);
+
+  Future<void> create(String id);
+}
+
+class _SomeClassFakeApi implements SomeClassApi {
+  final _logger = Logger();
+
+  List<SomeClass> myObjects = [
+    SomeClass('1'),
+    SomeClass('2'),
+    SomeClass('3'),
+  ];
+
+  @override
+  Future<List<SomeClass>> getObjects(String parameter) async {
+    _logger.d('SomeClassFakeApi => getObjects');
+
+    await Future.delayed(const Duration(seconds: 1));
+    return myObjects;
+  }
+
+  @override
+  Future<void> create(String id) async {
+    _logger.d('SomeClassFakeApi => create');
+
+    await Future.delayed(const Duration(seconds: 1));
+    myObjects = myObjects
+      ..add(SomeClass(id))
+      ..toList();
+  }
 }
 ```
 

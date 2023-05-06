@@ -6,7 +6,7 @@ import 'package:cached_repository/src/cache/hive_cache_storage.dart';
 import 'package:cached_repository/src/cache/memory_cache_storage.dart';
 import 'package:cached_repository/src/network_bound_resource.dart';
 import 'package:cached_repository/src/resource.dart';
-import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -37,49 +37,51 @@ import 'package:synchronized/synchronized.dart';
 /// ```
 class CachedRepository<K, V> {
   CachedRepository({
-    FetchCallable<K, V> fetch,
-    @required CacheStorage<K, V> storage,
-    Duration /*?*/ cacheDuration,
-    CacheDurationResolver<K, V> /*?*/ cacheDurationResolver,
+    FetchCallable<K, V>? fetch,
+    required CacheStorage<K, V> storage,
+    Duration? cacheDuration,
+    CacheDurationResolver<K, V>? cacheDurationResolver,
   })  : _fetch = fetch,
         _storage = storage,
         _cacheDurationResolver =
             (cacheDurationResolver ?? (k, v) => cacheDuration ?? Duration.zero);
 
-  CachedRepository.persistent(
-    String cacheName, {
-    FetchCallable<K, V> fetch,
-    @required EntityDecoder<V> decode,
-    Duration /*?*/ cacheDuration,
-    CacheDurationResolver<K, V> /*?*/ cacheDurationResolver,
-  })  : _fetch = fetch,
-        _storage = HiveCacheStorage(cacheName, decode: decode),
+  CachedRepository.persistent(String cacheName,
+      {FetchCallable<K, V>? fetch,
+      required EntityDecoder<V> decode,
+      Duration? cacheDuration,
+      CacheDurationResolver<K, V>? cacheDurationResolver,
+      Logger? logger})
+      : _fetch = fetch,
+        _storage = HiveCacheStorage(cacheName, decode: decode, logger: logger),
         _cacheDurationResolver =
             (cacheDurationResolver ?? (k, v) => cacheDuration ?? Duration.zero);
 
   CachedRepository.secureStorage(
     String cacheName, {
-    FetchCallable<K, V> fetch,
-    @required EntityDecoder<V> decode,
-    Duration /*?*/ cacheDuration,
-    CacheDurationResolver<K, V> /*?*/ cacheDurationResolver,
+    required EntityDecoder<V> decode,
+    FetchCallable<K, V>? fetch,
+    Duration? cacheDuration,
+    CacheDurationResolver<K, V>? cacheDurationResolver,
+    Logger? logger,
   })  : _fetch = fetch,
-        _storage = FlutterSecureCacheStorage(cacheName, decode: decode),
+        _storage = FlutterSecureCacheStorage(cacheName,
+            decode: decode, logger: logger),
         _cacheDurationResolver =
             (cacheDurationResolver ?? (k, v) => cacheDuration ?? Duration.zero);
 
   CachedRepository.inMemory(
     String cacheName, {
-    FetchCallable<K, V> fetch,
-    /*nullable*/ Duration cacheDuration,
-    /*nullable*/ CacheDurationResolver<K, V> cacheDurationResolver,
+    FetchCallable<K, V>? fetch,
+    Duration? cacheDuration,
+    CacheDurationResolver<K, V>? cacheDurationResolver,
   })  : _fetch = fetch,
         _storage = MemoryCacheStorage(cacheName),
         _cacheDurationResolver =
             (cacheDurationResolver ?? (k, v) => cacheDuration ?? Duration.zero);
 
   final Map<K, NetworkBoundResource<K, V>> _resources = {};
-  final /*nullable*/ FetchCallable<K, V> _fetch;
+  final FetchCallable<K, V>? _fetch;
   final CacheDurationResolver<K, V> _cacheDurationResolver;
   final _lock = Lock();
   final CacheStorage<K, V> _storage;
@@ -120,18 +122,21 @@ class CachedRepository<K, V> {
     dynamic fetchArguments,
   }) async {
     final resource = await _ensureResource(key);
-    return resource?.invalidate(forceReload, fetchArguments);
+    return resource.invalidate(forceReload, fetchArguments);
   }
 
-  Future<void> updateValue(K key, V Function(V value) changeValue,
+  Future<void> updateValue(K key, V? Function(V? value) changeValue,
       {bool notifyOnNull = false}) async {
     final resource = await _ensureResource(key);
     return resource.updateValue(changeValue, notifyOnNull: notifyOnNull);
   }
 
-  Future<V> getCachedValue(K key) async {
+  /// Return cached value.
+  ///
+  /// Pass [sync] false to access cached value without sync by lock.
+  Future<V?> getCachedValue(K key, {bool sync = true}) async {
     final resource = await _ensureResource(key);
-    return resource.getCachedValue();
+    return resource.getCachedValue(sync: sync);
   }
 
   Future<void> putValue(K key, V value) async {
@@ -139,7 +144,7 @@ class CachedRepository<K, V> {
     return resource.putValue(value);
   }
 
-  Future<void> clear([K key]) => _lock.synchronized(() async {
+  Future<void> clear([K? key]) => _lock.synchronized(() async {
         if (key != null) {
           await _resources[key]?.close();
           _resources.remove(key);

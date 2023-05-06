@@ -80,7 +80,7 @@ class SomeClass {
     };
   }
 
-  static List<SomeClass> listFromJson(List<dynamic>/*?*/ jsonList) =>
+  static List<SomeClass> listFromJson(List<dynamic> /*?*/ jsonList) =>
       (jsonList ?? [])
           .map((json) => SomeClass.fromJson(json))
           .toList(growable: false);

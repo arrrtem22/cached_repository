@@ -1,4 +1,3 @@
-
 import 'package:cached_repository/src/cache/cache_storage.dart';
 import 'package:synchronized/synchronized.dart';
 

@@ -11,7 +11,7 @@ class Resource<T> {
       Resource._(ResourceState.success, data: data);
 
   factory Resource.error(String message,
-      {dynamic error, StackTrace? stackTrace, T? data}) =>
+          {dynamic error, StackTrace? stackTrace, T? data}) =>
       Resource._(ResourceState.error,
           data: data, message: message, error: error, stackTrace: stackTrace);
 
@@ -34,22 +34,22 @@ class Resource<T> {
   bool get hasData => data != null;
 
   Resource<NewType> map<NewType>(NewType? Function(T?) transform) => Resource._(
-    state,
-    data: transform(data),
-    message: message,
-    error: error,
-    stackTrace: stackTrace,
-  );
+        state,
+        data: transform(data),
+        message: message,
+        error: error,
+        stackTrace: stackTrace,
+      );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Resource &&
-              runtimeType == other.runtimeType &&
-              state == other.state &&
-              _compareData(data, other.data) &&
-              message == other.message &&
-              error == other.error;
+      other is Resource &&
+          runtimeType == other.runtimeType &&
+          state == other.state &&
+          _compareData(data, other.data) &&
+          message == other.message &&
+          error == other.error;
 
   bool _compareData(dynamic v1, dynamic v2) =>
       v1 is List && v2 is List ? listEquals(v1, v2) : v1 == v2;

@@ -56,7 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: StreamBuilder(
-          stream: _service.getMyObjectsStream(_someParameter, forceReload: true),
+          stream:
+              _service.getMyObjectsStream(_someParameter, forceReload: true),
           builder: (context, res) {
             if (res.data?.hasData ?? false) {
               _logger.d(

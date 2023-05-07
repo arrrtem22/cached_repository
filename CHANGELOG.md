@@ -1,3 +1,11 @@
+## 0.1.2
+
+- Fix CI
+
+## 0.1.1
+
+- Update dependencies
+
 ## 0.1.0
 
 - Stable nullsafety

@@ -1,6 +1,6 @@
 name: cached_repository
 description: Simple, easy to use and extensible cached repository which can store all you need.
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/Oliinyk-Artemii/cached_repository
 
 environment:

@@ -101,7 +101,7 @@ class _BoxCacheEntry<V> extends CacheEntry<V> {
       );
 }
 
-String _jsonEncode<V>(V value, TypeSendPort<dynamic> sendPort) {
+String _jsonEncode<V>(V value) {
   try {
     return json.encode(value);
   } catch (e, trace) {
@@ -110,7 +110,7 @@ String _jsonEncode<V>(V value, TypeSendPort<dynamic> sendPort) {
   }
 }
 
-dynamic _jsonDecode(String data, TypeSendPort<dynamic> sendPort) {
+dynamic _jsonDecode(String data) {
   try {
     return json.decode(data);
   } catch (e, trace) {

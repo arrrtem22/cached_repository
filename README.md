@@ -144,7 +144,3 @@ class _SomeClassFakeApi implements SomeClassApi {
 Instead of a SomeClass and SomeClassApi, you can use your own classes.
 
 Feel free to open pull requests.
-
-# Acknowledgments
-
-This package was created by [Artemii Oliinyk](https://github.com/arrrtem22).

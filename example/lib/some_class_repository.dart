@@ -37,23 +37,23 @@ class SomeClassRepository {
 
   Future<void> removeObjectFromCache(
     String parameter, {
-    /*required*/ String objectId,
+    required String objectId,
   }) async {
     _logger.d('SomeClassRepository => removeObjectFromCache');
     return _cachedRepo.updateValue(parameter, (list) {
-      return list.where((it) => it.id != objectId).toList(growable: false);
+      return list?.where((it) => it.id != objectId).toList(growable: false);
     });
   }
 
   Future<void> removeObjectsFromCache(
     String parameter, {
-    /*required*/ List<String> objectIds,
+    required List<String> objectIds,
   }) async {
     _logger.d('SomeClassRepository => removeObjectsFromCache');
     return _cachedRepo.updateValue(parameter, (list) {
       return list
           ?.where((it) => !objectIds.contains(it.id))
-          ?.toList(growable: false);
+          .toList(growable: false);
     });
   }
 
@@ -80,10 +80,8 @@ class SomeClass {
     };
   }
 
-  static List<SomeClass> listFromJson(List<dynamic> /*?*/ jsonList) =>
-      (jsonList ?? [])
-          .map((json) => SomeClass.fromJson(json))
-          .toList(growable: false);
+  static List<SomeClass> listFromJson(List<dynamic> jsonList) =>
+      jsonList.map((json) => SomeClass.fromJson(json)).toList(growable: false);
 }
 
 abstract class SomeClassApi {
@@ -116,8 +114,6 @@ class _SomeClassFakeApi implements SomeClassApi {
     _logger.d('SomeClassFakeApi => create');
 
     await Future.delayed(const Duration(seconds: 1));
-    myObjects = myObjects
-      ..add(SomeClass(id))
-      ..toList();
+    myObjects = myObjects..add(SomeClass(id));
   }
 }

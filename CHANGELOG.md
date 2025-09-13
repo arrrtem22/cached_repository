@@ -1,3 +1,8 @@
+## 0.1.5
+- Updated dependencies for Dart 3
+- Fixed CI/CD workflows
+- Other minor improvements
+
 ## 0.1.1
 
 - Update dependencies

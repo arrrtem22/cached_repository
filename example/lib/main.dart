@@ -8,7 +8,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key}) : super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -34,8 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final _logger = Logger();
 
-  /*late final*/
-  SomeClassService _service;
+  late final SomeClassService _service;
 
   @override
   void initState() {
@@ -61,11 +60,11 @@ class _MyHomePageState extends State<MyHomePage> {
           builder: (context, res) {
             if (res.data?.hasData ?? false) {
               _logger.d(
-                  'Value (stream): ${(res.data.data as List<SomeClass>).map((e) => e.toJson()).toList()}');
+                  'Value (stream): ${(res.data!.data as List<SomeClass>).map((e) => e.toJson()).toList()}');
               return Text(
-                  'data: ${res.data.data.map((e) => e.toJson()).toList()}');
+                  'data: ${res.data!.data!.map((e) => e.toJson()).toList()}');
             } else if (res.data?.isError ?? false) {
-              _logger.d('Error (stream): ${res.data.error}');
+              _logger.d('Error (stream): ${res.data!.error}');
             }
             _logger.d('Loading (stream)');
             return const Text('loading');

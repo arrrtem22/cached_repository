@@ -7,8 +7,8 @@ import 'some_class_repository.dart';
 
 class SomeClassService {
   SomeClassService({
-    /*required*/ SomeClassApi someClassApi,
-    /*required*/ SomeClassRepository someClassRepository,
+    required SomeClassApi someClassApi,
+    required SomeClassRepository someClassRepository,
   })  : _someClassApi = someClassApi,
         _someClassRepository = someClassRepository;
 
